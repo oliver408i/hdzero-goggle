@@ -41,19 +41,19 @@ echo
 echo "**********************************************"
 echo "Preparing HDZero Goggle Build Environment....."
 echo "**********************************************"
-cmake . -DHDZ_GOGGLE=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=toolchain/share/buildroot/toolchainfile.cmake -Bbuild_goggle
+cmake . -DHDZ_GOGGLE=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=toolchain/share/buildroot/toolchainfile.cmake -Bbuild_goggle -DSDL2_DIR=/usr/lib/x86_64-linux-gnu/cmake/SDL2
 
 echo
 echo "**********************************************"
 echo "Preparing HDZero BoxPro Build Environment....."
 echo "**********************************************"
-cmake . -DHDZ_BOXPRO=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=toolchain/share/buildroot/toolchainfile.cmake -Bbuild_boxpro
+cmake . -DHDZ_BOXPRO=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=toolchain/share/buildroot/toolchainfile.cmake -Bbuild_boxpro -DSDL2_DIR=/usr/lib/x86_64-linux-gnu/cmake/SDL2
 
 echo
 echo "**********************************************"
 echo "Preparing HDZero Goggle2 Build Environment....."
 echo "**********************************************"
-cmake . -DHDZ_GOGGLE2=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=toolchain/share/buildroot/toolchainfile.cmake -Bbuild_goggle2
+cmake . -DHDZ_GOGGLE2=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=toolchain/share/buildroot/toolchainfile.cmake -Bbuild_goggle2 -DSDL2_DIR=/usr/lib/x86_64-linux-gnu/cmake/SDL2
 
 echo
 echo "****************************************"

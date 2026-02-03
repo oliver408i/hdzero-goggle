@@ -16,6 +16,7 @@
 #include "core/osd.h"
 #include "core/settings.h"
 #include "driver/fbtools.h"
+#include "driver/gpadc.h"
 #include "driver/hardware.h"
 #include "driver/i2c.h"
 #include "driver/rtc6715.h"
@@ -201,21 +202,39 @@ static void analog_change_band(int delta) {
     analog_select_signal(analog_user_select_index);
 }
 
+static int analog_rssi_percent_from_adc() {
+    int value = gpdac0_get();
+    if (value < 0) {
+        return -1;
+    }
+
+    int rssi_mv = 3300 * value / 4096;
+    if (g_setting.analog_rssi.calib_min == g_setting.analog_rssi.calib_max) {
+        return 0;
+    }
+    if (rssi_mv <= g_setting.analog_rssi.calib_min) {
+        return 0;
+    }
+    if (rssi_mv >= g_setting.analog_rssi.calib_max) {
+        return 100;
+    }
+    return (rssi_mv - g_setting.analog_rssi.calib_min) * 100 /
+           (g_setting.analog_rssi.calib_max - g_setting.analog_rssi.calib_min);
+}
+
 static void scan_channel_analog(uint8_t channel, uint8_t *gain_ret, bool *valid) {
-    int rssi_volt_mv;
+    int rssi_percent;
 
     rtc6715.set_ch(channel);
     usleep(120000);
 
-    rssi_volt_mv = rtc6715.rssi;
-    rssi_volt_mv -= 1600;
-    rssi_volt_mv = (rssi_volt_mv < 0) ? 0 : rssi_volt_mv;
-    rssi_volt_mv /= 6;
-    if (rssi_volt_mv > 100)
-        rssi_volt_mv = 100;
+    rssi_percent = analog_rssi_percent_from_adc();
+    if (rssi_percent < 0) {
+        rssi_percent = 0;
+    }
 
-    *gain_ret = (uint8_t)rssi_volt_mv;
-    *valid = rssi_volt_mv > 5;
+    *gain_ret = (uint8_t)rssi_percent;
+    *valid = rssi_percent > 5;
 
     LOGI("Analog scan ch:%d valid:%d gain:%d", channel + 1, *valid, *gain_ret);
 }
@@ -226,6 +245,12 @@ static int8_t scan_analog_now(void) {
     uint8_t valid_index;
     char buf[128];
     int found_count = 0;
+
+#ifndef EMULATOR_BUILD
+    // Ensure the analog RF front-end is powered for RSSI reads.
+    rtc6715.init(1, 0);
+    usleep(100 * 1000);
+#endif
 
 #ifdef EMULATOR_BUILD
     snprintf(buf, sizeof(buf), "%s...", _lang("Scanning"));
@@ -302,6 +327,9 @@ static int8_t scan_analog_now(void) {
     lv_label_set_text(analog_label, _lang("Scanning done"));
     snprintf(buf, sizeof(buf), "%s: %d", _lang("Found"), found_count);
     lv_label_set_text(analog_found_label, buf);
+#ifndef EMULATOR_BUILD
+    rtc6715.init(0, 0);
+#endif
     if (!valid_index)
         return -1;
     else

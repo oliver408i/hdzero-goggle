@@ -200,7 +200,7 @@ if(NOT EMULATOR_BUILD)
 
 	# image build
 	add_custom_target(MKAPP ALL
-		COMMAND rsync -r ${PROJECT_SOURCE_DIR}/mkapp ${CMAKE_CURRENT_BINARY_DIR}/
+		COMMAND rsync -r --exclude app/platform ${PROJECT_SOURCE_DIR}/mkapp ${CMAKE_CURRENT_BINARY_DIR}/
 	)
 	add_custom_command(
 		OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/out/${PROJECT_NAME}
