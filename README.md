@@ -28,3 +28,5 @@ Note you can always go back to the original firmware by downloading it from the 
 
 ## Pictures
 Note these are taken in the emulator, but I verified it looks the same in the goggles.
+<img width="2560" height="1440" alt="image" src="https://github.com/user-attachments/assets/87e080d4-1089-4a9c-8f51-a73eef77495b" />
+<img width="2560" height="1440" alt="image" src="https://github.com/user-attachments/assets/906fd841-28b9-43fb-bfee-a6028fdd66df" />
