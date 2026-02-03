@@ -9,6 +9,7 @@
 #include <sys/epoll.h>
 #include <sys/stat.h>
 #include <sys/time.h>
+#include <time.h>
 #include <unistd.h>
 
 #include <log/log.h>
@@ -58,9 +59,30 @@ static uint8_t tune_state = 0; // 0=init; 1=waiting for key; 2=tuning
 static uint16_t tune_timer = 0;
 
 #define EPOLL_FD_CNT 4
+#define ROLLER_MIN_INTERVAL_MS 15
 
 static int epfd;
 static pthread_t input_device_pid;
+
+static uint64_t monotonic_ms(void) {
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return (uint64_t)ts.tv_sec * 1000ULL + (uint64_t)ts.tv_nsec / 1000000ULL;
+}
+
+static bool roller_rate_limit(int dir) {
+    static uint64_t last_ms = 0;
+    static int last_dir = 0;
+    uint64_t now = monotonic_ms();
+    if (last_ms != 0 && (now - last_ms) < ROLLER_MIN_INTERVAL_MS) {
+        if (dir == last_dir) {
+            return false;
+        }
+    }
+    last_ms = now;
+    last_dir = dir;
+    return true;
+}
 
 // action: 1 = tune up, 2 = tune down, 3 = confirm
 void exit_tune_channel() {
@@ -389,6 +411,8 @@ static void roller_up(void) {
     if (g_app_state == APP_STATE_USER_INPUT_DISABLED)
         return;
 
+    if (!roller_rate_limit(DIAL_KEY_UP))
+        return;
     pthread_mutex_lock(&lvgl_mutex);
     autoscan_exit();
     if (g_app_state == APP_STATE_MAINMENU) // main menu
@@ -424,6 +448,8 @@ static void roller_down(void) {
     if (g_app_state == APP_STATE_USER_INPUT_DISABLED)
         return;
 
+    if (!roller_rate_limit(DIAL_KEY_DOWN))
+        return;
     pthread_mutex_lock(&lvgl_mutex);
     autoscan_exit();
     if (g_app_state == APP_STATE_MAINMENU) {

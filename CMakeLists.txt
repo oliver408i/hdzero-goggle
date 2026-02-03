@@ -89,6 +89,11 @@ file(GLOB SRC_FILES_PLAYER "src/player/*.c" "src/player/*.h")
 file(GLOB SRC_FILES_EMULATOR "src/emulator/*.c" "src/emulator/*.h")
 file(GLOB SRC_FILES_LANG "src/lang/*.c" "src/lang/*.h")
 
+list(APPEND SRC_FILES_UI
+	src/ui/page_scananalog.c
+	src/ui/page_scananalog.h
+)
+
 if(HDZ_GOGGLE)
 	file(GLOB SRC_FILES_IMAGE  "src/image/goggle/*.c" "src/image/goggle/*.h")
 elseif(HDZ_BOXPRO)
@@ -195,7 +200,7 @@ if(NOT EMULATOR_BUILD)
 
 	# image build
 	add_custom_target(MKAPP ALL
-		COMMAND rsync -r ${PROJECT_SOURCE_DIR}/mkapp ${CMAKE_CURRENT_BINARY_DIR}/
+		COMMAND rsync -r --exclude app/platform ${PROJECT_SOURCE_DIR}/mkapp ${CMAKE_CURRENT_BINARY_DIR}/
 	)
 	add_custom_command(
 		OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/out/${PROJECT_NAME}
